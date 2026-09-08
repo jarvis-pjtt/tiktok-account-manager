@@ -19,6 +19,10 @@ SETTINGS_FILE = DATA_DIR / "settings.json"
 for _d in (DATA_DIR, PROFILES_DIR):
     _d.mkdir(parents=True, exist_ok=True)
 
+# Where the app looks for new versions. Users can override it in the settings window; an empty
+# value there falls back to this.
+DEFAULT_UPDATE_REPO = "jarvis-pjtt/tiktok-account-manager"
+
 DEFAULT_SETTINGS: dict[str, Any] = {
     # --- appearance ---
     "appearance": "dark",             # dark | light
@@ -31,7 +35,7 @@ DEFAULT_SETTINGS: dict[str, Any] = {
     "login_wait_minutes": 5,          # how long auto-login waits for OTP/captcha before handing over
     "home_url": "https://www.tiktok.com/tiktokstudio",   # page opened once the account is logged in
     # --- updates (GitHub Releases) ---
-    "update_repo": "",                # "owner/repo" of the public repo holding the releases
+    "update_repo": DEFAULT_UPDATE_REPO,   # "owner/repo" of the public repo holding the releases
     "auto_check_update": True,        # check once, a few seconds after start
     # --- selectors (editable if TikTok changes its layout) ---
     "selectors": {

@@ -15,7 +15,7 @@ from pathlib import Path
 from tkinter import messagebox, ttk
 
 from . import __version__
-from .config import SETTINGS_FILE, Settings
+from .config import DEFAULT_UPDATE_REPO, SETTINGS_FILE, Settings
 from .profiles import ProfileManager
 from .theme import (C, FONT, FONT_B, FONT_MONO, FlatButton, FlatMenu, bordered, checkbox, entry,
                     frame, label, set_readonly_text, style_ttk, textbox, use_theme)
@@ -194,7 +194,7 @@ class SettingsDialog(Dialog):
         ("window_height", "ความสูงหน้าต่าง Chrome:"),
         ("login_wait_minutes", "รอล็อกอินอัตโนมัติสูงสุด (นาที):"),
         ("home_url", "หน้าที่เปิดหลังล็อกอิน:"),
-        ("update_repo", "GitHub repo สำหรับอัปเดต (owner/repo):"),
+        ("update_repo", "GitHub repo สำหรับอัปเดต (ว่าง = ปิดอัปเดต):"),
     ]
 
     def __init__(self, master, settings: Settings, log):
@@ -319,11 +319,12 @@ class App(tk.Tk):
 
     # ------------------------------------------------------------------ updates
     def check_update(self, manual: bool = False):
-        repo = (self.settings.get("update_repo") or "").strip()
+        # an empty setting (or a settings.json written by an older build) falls back to the built-in repo
+        repo = (self.settings.get("update_repo") or DEFAULT_UPDATE_REPO).strip()
         if not repo:
             if manual:
-                messagebox.showinfo("อัปเดต", "ยังไม่ได้ตั้งค่า GitHub repo\n\n"
-                                              "ไปที่ ตั้งค่า → 'GitHub repo สำหรับอัปเดต' แล้วใส่ owner/repo")
+                messagebox.showinfo("อัปเดต", "ปิดการอัปเดตไว้ — ช่อง 'GitHub repo สำหรับอัปเดต' "
+                                              "ในหน้าตั้งค่าถูกลบค่าเริ่มต้นออกไป")
             return
         self._bg(self._update_check_worker, repo, manual, name="update-check")
 
