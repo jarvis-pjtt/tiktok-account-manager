@@ -23,20 +23,21 @@ API_URL = "https://api.github.com/repos/{repo}/releases/latest"
 TIMEOUT = 20
 EXE_NAME = "TikTokAccountManager.exe"
 
-# Waits for the app to close, copies the new build over it, restarts it, then deletes itself.
+# Copies the new build over the install folder, restarts the app, then deletes itself.
+#
+# No wait-for-PID loop on purpose: matching a PID with tasklist can hang forever (Windows reuses
+# PIDs, so the loop can keep "seeing" a dead process). Instead: a short pause, then robocopy with
+# retries — a file still held by the closing app is simply retried until the lock clears.
 # /E (not /MIR) never deletes anything on the destination, so user data cannot be lost.
 UPDATE_BAT = r"""@echo off
 setlocal
 set LOG=%TEMP%\tam_update.log
-echo ---- update start %date% %time% >> "%LOG%"
-:wait
-tasklist /FI "PID eq {pid}" | find "{pid}" >nul 2>&1
-if not errorlevel 1 (
-  ping -n 2 127.0.0.1 >nul
-  goto wait
-)
-robocopy "{src}" "{dst}" /E /R:2 /W:1 /XD "{dst}\data" >> "%LOG%" 2>&1
-if errorlevel 8 echo ROBOCOPY FAILED >> "%LOG%"
+echo ---- update start %date% %time% (pid {pid}) >> "%LOG%"
+ping -n 4 127.0.0.1 >nul
+robocopy "{src}" "{dst}" /E /R:30 /W:1 /XD "{dst}\data" >> "%LOG%" 2>&1
+set RC=%errorlevel%
+echo ---- robocopy exit %RC% >> "%LOG%"
+if %RC% GEQ 8 echo ---- ROBOCOPY FAILED, app left as it was >> "%LOG%"
 echo ---- restart >> "%LOG%"
 start "" "{exe}"
 rmdir /s /q "{payload}" >nul 2>&1

@@ -392,6 +392,7 @@ class App(tk.Tk):
         for bot in list(self._login_bots.values()):
             bot.close()
         self.destroy()
+        os._exit(0)      # leave nothing holding the files the updater is about to overwrite
 
     def _home_url(self) -> str:
         return (self.settings.get("home_url") or "https://www.tiktok.com/tiktokstudio").strip()
