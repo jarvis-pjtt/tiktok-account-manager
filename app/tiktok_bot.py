@@ -74,19 +74,23 @@ class TikTokBrowser:
 
         self._pw = sync_playwright().start()
         channel = self.settings.get("chrome_channel", "chrome") or None
+        args = [
+            f"--window-size={self.settings.get('window_width', 1280)},{self.settings.get('window_height', 900)}",
+            "--disable-blink-features=AutomationControlled",
+            "--no-first-run",
+            "--no-default-browser-check",
+        ]
         kwargs = dict(
             user_data_dir=str(self.profile.user_data_dir),
             headless=self.headless,
             viewport=None,
             no_viewport=True,
             locale="th-TH",
-            args=[
-                f"--window-size={self.settings.get('window_width', 1280)},{self.settings.get('window_height', 900)}",
-                "--disable-blink-features=AutomationControlled",
-                "--no-first-run",
-                "--no-default-browser-check",
-            ],
-            ignore_default_args=["--enable-automation"],
+            args=args,
+            # Playwright disables extensions by default; drop those switches so extensions can be
+            # installed from the Chrome Web Store (they stay in this profile) and actually run.
+            ignore_default_args=["--enable-automation", "--disable-extensions",
+                                 "--disable-component-extensions-with-background-pages"],
             timeout=120_000,
         )
         try:
