@@ -1,0 +1,13 @@
+# build output
+build/
+dist/
+*.spec.bak
+
+# user data (accounts, chrome profiles, settings) — must never be committed
+data/
+
+# python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
